@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "succession-one": {
+      "type": "http",
+      "url": "https://one.succession.bio/api/mcp"
+    }
+  }
+}

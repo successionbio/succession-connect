@@ -1,0 +1,33 @@
+{
+  "name": "succession",
+  "owner": {
+    "name": "Succession Bio",
+    "url": "https://succession.bio"
+  },
+  "metadata": {
+    "description": "Official Succession ONE plugins for Claude Code and Codex.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "succession-one",
+      "description": "Connect Claude Code to Succession ONE with product guides, workspace skills, and browser OAuth.",
+      "version": "0.1.0",
+      "source": "./plugins/claude/succession-one",
+      "author": {
+        "name": "Succession Bio",
+        "url": "https://succession.bio"
+      },
+      "homepage": "https://one.succession.bio",
+      "repository": "https://github.com/successionbio/succession-connect",
+      "category": "productivity",
+      "tags": [
+        "succession-one",
+        "mcp",
+        "gtm",
+        "campaigns",
+        "crm"
+      ]
+    }
+  ]
+}

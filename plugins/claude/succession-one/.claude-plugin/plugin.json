@@ -1,0 +1,14 @@
+{
+  "name": "succession-one",
+  "version": "0.1.0",
+  "description": "Succession ONE — run your GTM skills (profile, research, messaging, campaign launch) as slash commands from Claude Code, backed by the Succession MCP server.",
+  "author": {
+    "name": "Succession Bio",
+    "url": "https://succession.bio"
+  },
+  "homepage": "https://one.succession.bio",
+  "repository": "https://github.com/successionbio/succession-connect",
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "mcpServers": "./.mcp.json"
+}

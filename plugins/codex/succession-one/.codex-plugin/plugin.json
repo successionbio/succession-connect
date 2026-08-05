@@ -1,0 +1,44 @@
+{
+  "name": "succession-one",
+  "version": "0.1.0",
+  "description": "Use Succession ONE from Codex with surface guides, workspace skills, artifacts, approvals, and MCP tools.",
+  "author": {
+    "name": "Succession Bio",
+    "url": "https://succession.bio"
+  },
+  "homepage": "https://succession.bio",
+  "repository": "https://github.com/successionbio/succession-connect",
+  "license": "UNLICENSED",
+  "keywords": [
+    "succession-one",
+    "succession",
+    "mcp",
+    "codex",
+    "gtm",
+    "agents",
+    "workflows",
+    "campaigns",
+    "crm"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Succession ONE",
+    "shortDescription": "Work inside Succession ONE from Codex with live MCP tools and surface guides.",
+    "longDescription": "Succession ONE for Codex gives operators and workspace users a guided command set for using Succession ONE surfaces from Codex. It bundles surface guides for routing, campaigns, inbox, CRM, library, automations, approvals, artifacts, and settings, and connects the production MCP through browser OAuth.",
+    "developerName": "Succession Bio",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://succession.bio",
+    "defaultPrompt": [
+      "Open Succession ONE and show what needs attention.",
+      "Build a campaign draft and save it to the Library.",
+      "Analyze inbox replies and prepare approved next actions."
+    ],
+    "screenshots": []
+  }
+}
