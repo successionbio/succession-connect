@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Official Succession ONE plugins for Claude Code and Codex.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "succession-one",
       "description": "Connect Claude Code to Succession ONE with product guides, workspace skills, and browser OAuth.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./plugins/claude/succession-one",
       "author": {
         "name": "Succession Bio",

@@ -5,8 +5,8 @@ description: "Diagnose Succession ONE Codex connection, MCP, permission, run, co
 
 # Troubleshooting
 
-Generated from `docs/surfaces/guides/troubleshooting.md`. Do not edit this generated skill by hand.
-Update the source guide and run `pnpm --filter succession-connect gen`.
+Maintained in `successionbio/succession-connect` (originally generated from `docs/surfaces/guides/troubleshooting.md`).
+Tool names checked against the live Succession ONE MCP catalog for v0.2.0.
 
 - Status: `live`
 - Category: `cross_cutting`
@@ -51,14 +51,19 @@ Primary MCP tools:
 
 1. On the first Succession interaction, call `ping` without context.
 2. If it returns `principal_type=workspace`, use Workspace-scoped tools
-   normally. Context is optional and cannot target another Workspace.
-3. If it returns `principal_type=agency`, use Agency-scoped tools without
-   context. Before client work, call `manage_managed_workspace` with
-   `action="resolve_workspace"`, then pass the exact returned `context`
-   object on every Workspace-scoped call, including `get_workspace_context`,
-   `list_skills`, and `run_skill`.
+   normally. `client_id` is optional and cannot target another Workspace.
+3. If it returns `principal_type=agency` (agency operators only), use
+   Agency-scoped tools without `client_id`. Before client work, call
+   `manage_managed_workspace` with `action="resolve_workspace"` and
+   `params.query` set to the client name or UUID, then pass the returned
+   `client_id` on every Workspace-scoped call, including
+   `get_workspace_context`, `list_skills`, and `run_skill`.
 4. Check `succession_context.workspace_name` in every result before relying
    on it. There is no persistent Workspace switch.
+5. Tools take `action`, `params`, optional `client_id`, and `confirm`.
+   Writes return a dry-run plan until they are called again with
+   `confirm=true` after the operator approves. Read-only `read_*` aliases
+   need no confirmation.
 
 
 
@@ -77,12 +82,13 @@ something did not work.
 
 - Diagnose layer by layer: token, workspace, permission, tool, connector,
   approval, run, browser.
-- `agency_workspace_context_required` is not a connection failure. Resolve the
-  client through `manage_managed_workspace` `resolve_workspace`, then repeat
-  its context on each Workspace-scoped call.
-- An MCP invalid-arguments/schema error after sending `context` to an
-  Agency-scoped or connection-scoped tool means it must be retried without
-  context.
+- `client_required` is not a connection failure. Resolve the client through
+  `manage_managed_workspace` `resolve_workspace`, then pass its `client_id` on
+  each Workspace-scoped call.
+- `conflicting_client_selection` means one call named two different clients;
+  retry with one consistent `client_id`.
+- An MCP invalid-arguments/schema error after sending `client_id` to an
+  Agency-scoped or connection-scoped tool means it must be retried without it.
 - Prefer current platform state over guessing.
 - Return the surface where the user can fix the blocking condition.
 
@@ -100,7 +106,8 @@ something did not work.
   discovery.
 - For a regular principal, use `get_workspace_context` for Workspace state.
 - Use `get_agency_context` and `manage_managed_workspace`
-  `resolve_workspace` when the principal is Agency-scoped.
+  `resolve_workspace` only when the principal is Agency-scoped. Customer
+  Workspaces do not have these tools; skip them there.
 - Use `list_agent_activity` for run failures.
 - Use `list_approvals` for blocked live actions.
 - Use `manage_connector` for connector readiness.
