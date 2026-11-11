@@ -5,8 +5,8 @@ description: "Route Codex work across Succession ONE surfaces, workspace skills,
 
 # Succession ONE Router
 
-Generated from `docs/surfaces/guides/succession.md`. Do not edit this generated skill by hand.
-Update the source guide and run `pnpm --filter succession-connect gen`.
+Maintained in `successionbio/succession-connect` (originally generated from `docs/surfaces/guides/succession.md`).
+Tool names checked against the live Succession ONE MCP catalog for v0.2.0.
 
 - Status: `live`
 - Category: `router`
@@ -57,14 +57,19 @@ Primary MCP tools:
 
 1. On the first Succession interaction, call `ping` without context.
 2. If it returns `principal_type=workspace`, use Workspace-scoped tools
-   normally. Context is optional and cannot target another Workspace.
-3. If it returns `principal_type=agency`, use Agency-scoped tools without
-   context. Before client work, call `manage_managed_workspace` with
-   `action="resolve_workspace"`, then pass the exact returned `context`
-   object on every Workspace-scoped call, including `get_workspace_context`,
-   `list_skills`, and `run_skill`.
+   normally. `client_id` is optional and cannot target another Workspace.
+3. If it returns `principal_type=agency` (agency operators only), use
+   Agency-scoped tools without `client_id`. Before client work, call
+   `manage_managed_workspace` with `action="resolve_workspace"` and
+   `params.query` set to the client name or UUID, then pass the returned
+   `client_id` on every Workspace-scoped call, including
+   `get_workspace_context`, `list_skills`, and `run_skill`.
 4. Check `succession_context.workspace_name` in every result before relying
    on it. There is no persistent Workspace switch.
+5. Tools take `action`, `params`, optional `client_id`, and `confirm`.
+   Writes return a dry-run plan until they are called again with
+   `confirm=true` after the operator approves. Read-only `read_*` aliases
+   need no confirmation.
 
 
 
@@ -86,8 +91,8 @@ open something live in the app.
 
 - Primitive MCP tools inspect or mutate platform state directly.
 - Regular Workspace credentials are pinned to one Workspace. Agency credentials
-  resolve a managed client through the Agency roster and repeat the returned
-  `context` object on every Workspace-scoped call; there is no persistent
+  resolve a managed client through the Agency roster and pass the returned
+  `client_id` on every Workspace-scoped call; there is no persistent
   Workspace switch.
 - Every dispatched response includes `succession_context`. Confirm its
   Workspace name before relying on a result, especially for Agency work.
@@ -115,7 +120,7 @@ surface from intent, load the relevant guide, and proceed through this loop:
    outcome, risk, audience, or irreversible effect.
 4. Use safe product defaults when the operator's intent is clear enough.
 5. Use MCP for platform state, durable actions, approvals, and artifacts. For
-   an Agency-managed client, pass the resolver's `context` unchanged on every
+   an Agency-managed client, pass the resolver's `client_id` unchanged on every
    Workspace-scoped tool call.
 6. Automatically open or use Browser for any workflow that creates, updates, or
    verifies something visible in the app.
@@ -159,7 +164,7 @@ selected company context, then verify it in Browser.
 ## MCP Tools And Actions
 
 - Regular users use `get_workspace_context` before taking scoped Workspace
-  action. If it reports `agency_workspace_context_required`, follow the Agency
+  action. If it reports `client_required`, follow the Agency
   guide to resolve a managed Workspace rather than changing credentials.
 - Use `query_today` for broad attention, focus, daily queue, and resume-work
   requests.
@@ -218,10 +223,11 @@ the user should inspect it in the Library.
 
 ## Failure Modes
 
-- Missing token or workspace context: send the user to the full settings/MCP URL
-  when known.
-- `agency_workspace_context_required`: resolve the requested managed Workspace
-  from the Agency roster and repeat its returned context. Do not mint another
+- Missing token or workspace context: run `codex mcp login succession-one` or send
+  the user to Settings → API + MCP (full URL
+  when known).
+- `client_required`: resolve the requested managed Workspace
+  from the Agency roster and pass its returned `client_id`. Do not mint another
   key, edit MCP configuration, or restart the client.
 - Tool result is permission-filtered: report the boundary instead of guessing.
 - Skill is absent: explain that no matching workspace skill exists and fall

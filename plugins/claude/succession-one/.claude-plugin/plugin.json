@@ -1,6 +1,6 @@
 {
   "name": "succession-one",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Succession ONE — run your GTM skills (profile, research, messaging, campaign launch) as slash commands from Claude Code, backed by the Succession MCP server.",
   "author": {
     "name": "Succession Bio",

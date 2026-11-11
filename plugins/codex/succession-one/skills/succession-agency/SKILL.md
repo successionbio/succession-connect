@@ -1,12 +1,18 @@
 ---
 name: succession-agency
-description: "Use Agency to inspect and operate the agency command center — the managed-workspace roster, cross-workspace work/timeline, service and workspace templates, sending infrastructure, deliverability/health/governance rollups, notifications, approvals, runs, and publishing."
+description: "Agency only (agency operators; not available in customer Workspaces). Use Agency to inspect and operate the agency command center — the managed-workspace roster, cross-workspace work/timeline, service and workspace templates, sending infrastructure, deliverability/health/governance rollups, notifications, approvals, runs, and publishing."
 ---
 
 # Agency
 
-Generated from `docs/surfaces/guides/agency.md`. Do not edit this generated skill by hand.
-Update the source guide and run `pnpm --filter succession-connect gen`.
+> **Agency only.** This guide is for agency operators who manage client
+> Workspaces. Before using it, call `ping`: if `principal_type` is not
+> `agency`, or `get_agency_context` and `manage_managed_workspace` are not in
+> your tool list, you are in a customer Workspace. Say that this needs an agency
+> operator and stop; do not try the agency tools.
+
+Maintained in `successionbio/succession-connect` (originally generated from `docs/surfaces/guides/agency.md`).
+Tool names checked against the live Succession ONE MCP catalog for v0.2.0.
 
 - Status: `partial`
 - Category: `surface`
@@ -63,14 +69,19 @@ Primary MCP tools:
 
 1. On the first Succession interaction, call `ping` without context.
 2. If it returns `principal_type=workspace`, use Workspace-scoped tools
-   normally. Context is optional and cannot target another Workspace.
-3. If it returns `principal_type=agency`, use Agency-scoped tools without
-   context. Before client work, call `manage_managed_workspace` with
-   `action="resolve_workspace"`, then pass the exact returned `context`
-   object on every Workspace-scoped call, including `get_workspace_context`,
-   `list_skills`, and `run_skill`.
+   normally. `client_id` is optional and cannot target another Workspace.
+3. If it returns `principal_type=agency` (agency operators only), use
+   Agency-scoped tools without `client_id`. Before client work, call
+   `manage_managed_workspace` with `action="resolve_workspace"` and
+   `params.query` set to the client name or UUID, then pass the returned
+   `client_id` on every Workspace-scoped call, including
+   `get_workspace_context`, `list_skills`, and `run_skill`.
 4. Check `succession_context.workspace_name` in every result before relying
    on it. There is no persistent Workspace switch.
+5. Tools take `action`, `params`, optional `client_id`, and `confirm`.
+   Writes return a dry-run plan until they are called again with
+   `confirm=true` after the operator approves. Read-only `read_*` aliases
+   need no confirmation.
 
 
 
@@ -97,11 +108,11 @@ approvals, or publishing work.
 
 - Agency context is not the same as workspace context — `get_agency_context`
   establishes the agency scope before any agency-scoped conclusion.
-- Agency-scoped tools stay on the Agency home Workspace and reject a Workspace
-  `context`. Workspace-scoped tools require an Agency user to pass
-  `context.workspace_id` on every call.
+- Agency-scoped tools stay on the Agency home Workspace and take no
+  `client_id`. Workspace-scoped tools require an Agency user to pass
+  `client_id` on every call (otherwise they return `client_required`).
 - Resolve a client with `manage_managed_workspace` `resolve_workspace` using an
-  exact UUID, slug, or case-insensitive name. It returns the context object to
+  exact UUID, slug, or case-insensitive name. It returns the `client_id` to
   reuse. There is no stateful switch, per-client key, configuration edit, or
   restart between managed Workspaces.
 - A managed workspace can be on the agency's roster (a junction row) without
@@ -149,7 +160,7 @@ approvals, or publishing work.
 - Use `get_agency_context` before any agency-scoped conclusion.
 - Use `manage_managed_workspace` for the roster and per-workspace record:
   `list_roster`, `resolve_workspace` (exact UUID, slug, or name to a verified
-  identity plus reusable `context`; ambiguity returns candidates), `get`,
+  identity plus a reusable `client_id`; ambiguity returns candidates), `get`,
   `update_record` (lifecycle stage, owners, package,
   contract/renewal dates, billing, stakeholders — lazy upsert),
   `list_stage_definitions`/`upsert_stage_definition` (the workspace's own
@@ -161,7 +172,7 @@ approvals, or publishing work.
   to an agency user or nudged to a managed workspace/its user),
   `instantiate_checklist` to seed tasks from a checklist template, and
   `list_checklist_templates`/`upsert_checklist_template` to manage the
-  templates. Task pushes to Linear are best-effort and non-fatal — a sync
+  templates. Task pushes to the agency task tracker are best-effort and non-fatal — a sync
   failure is recorded but does not fail the write.
 - Use `manage_org_timeline` for manual notes and derived activity: `append` (a
   manual entry — call, meeting, decision, incident, billing, etc.), `list`
@@ -237,9 +248,9 @@ packets as artifacts with clear workspace scope.
 
 - Agency review: get agency context, list approvals and runs, group by
   workspace, and return the highest-risk next actions.
-- Managed-client work: call `resolve_workspace`, repeat the returned `context`
+- Managed-client work: call `resolve_workspace`, pass the returned `client_id`
   on every Workspace-scoped call, and confirm the echoed
-  `succession_context.workspace_name`. Use `get` without context only for the
+  `succession_context.workspace_name`. Use `get` without `client_id` only for the
   Agency-scoped roster record itself.
 - Roster check: `manage_managed_workspace` `list_roster`, resolve the intended
   row, then `get` it for its record, stage definitions, and junction state.
@@ -264,7 +275,7 @@ packets as artifacts with clear workspace scope.
 - A valid but unintended managed UUID is still authorized. Treat the echoed
   Workspace name as the final tenant check before follow-up actions.
 - Publishing status is assumed from draft state alone.
-- A Linear push failure on `manage_org_task` is non-fatal — the task write
+- A task-tracker push failure on `manage_org_task` is non-fatal — the task write
   still succeeds; check `metadata.linear_sync_error` rather than assuming the
   whole call failed.
 - `manage_workspace_template` `provision` can partially fail; the error

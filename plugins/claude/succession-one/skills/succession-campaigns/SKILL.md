@@ -5,8 +5,8 @@ description: "Use Campaigns to build, inspect, edit, and launch-gate campaigns, 
 
 # Campaigns
 
-Generated from `docs/surfaces/guides/campaigns.md`. Do not edit this generated skill by hand.
-Update the source guide and run `pnpm --filter succession-connect gen`.
+Maintained in `successionbio/succession-connect` (originally generated from `docs/surfaces/guides/campaigns.md`).
+Tool names checked against the live Succession ONE MCP catalog for v0.2.0.
 
 - Status: `live`
 - Category: `surface`
@@ -54,14 +54,19 @@ Primary MCP tools:
 
 1. On the first Succession interaction, call `ping` without context.
 2. If it returns `principal_type=workspace`, use Workspace-scoped tools
-   normally. Context is optional and cannot target another Workspace.
-3. If it returns `principal_type=agency`, use Agency-scoped tools without
-   context. Before client work, call `manage_managed_workspace` with
-   `action="resolve_workspace"`, then pass the exact returned `context`
-   object on every Workspace-scoped call, including `get_workspace_context`,
-   `list_skills`, and `run_skill`.
+   normally. `client_id` is optional and cannot target another Workspace.
+3. If it returns `principal_type=agency` (agency operators only), use
+   Agency-scoped tools without `client_id`. Before client work, call
+   `manage_managed_workspace` with `action="resolve_workspace"` and
+   `params.query` set to the client name or UUID, then pass the returned
+   `client_id` on every Workspace-scoped call, including
+   `get_workspace_context`, `list_skills`, and `run_skill`.
 4. Check `succession_context.workspace_name` in every result before relying
    on it. There is no persistent Workspace switch.
+5. Tools take `action`, `params`, optional `client_id`, and `confirm`.
+   Writes return a dry-run plan until they are called again with
+   `confirm=true` after the operator approves. Read-only `read_*` aliases
+   need no confirmation.
 
 
 
@@ -129,17 +134,21 @@ messaging, configure launch settings, or prepare launch.
   watches referenced by signal-type campaigns.
 - Use `manage_campaign_launch_settings` for send configuration — the only
   section still editable while a campaign is in review state.
-- Use `manage_campaign` for dispatch/launch actions (dry-run by default; a
-  live send requires the workspace's live-dispatch flag plus an approved
-  approval).
-- Use `run_skill` for research, scoring, messaging, and launch skills.
+- Use `manage_campaign_messaging` to draft, refine, and sample campaign copy
+  (`read_campaign_messaging` for `review_status` and coverage). Sample approval
+  and manual edits stay human-only in the app.
+- Use `manage_campaign` for launch actions: `prepare`, `launch_rehearsal`,
+  then `launch_full` (dry-run by default; a live send requires the workspace's
+  live-dispatch setting plus an approved approval).
+- Use `run_skill` for research, scoring, messaging, and review skills.
 - Use `manage_approval` for launch or send gates.
 
 ## Workspace Skills To Discover
 
-Look for write messaging, build messaging source pack, score prospect list,
-draft outreach, launch email platform campaign, launch HeyReach campaign, and
-campaign readiness skills.
+Look for campaign ideation, content to campaign, write messaging, build
+messaging source pack, subject line writer, score prospect list, review
+messaging, and review campaign package skills. Launches go through
+`manage_campaign`; the older standalone launch skills are retired.
 
 ## URLs To Return
 

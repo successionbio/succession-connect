@@ -2,8 +2,8 @@
   "mcpServers": {
     "succession-one": {
       "type": "http",
-      "url": "https://one.succession.bio/api/mcp",
-      "oauth_resource": "https://one.succession.bio/api/mcp"
+      "url": "https://mcp.succession.bio/one/mcp",
+      "oauth_resource": "https://mcp.succession.bio/one/mcp"
     }
   }
 }

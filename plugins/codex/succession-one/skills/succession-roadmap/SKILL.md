@@ -5,8 +5,8 @@ description: "Use Roadmap to inspect and update the GTM Roadmap — planning ite
 
 # Roadmap
 
-Generated from `docs/surfaces/guides/roadmap.md`. Do not edit this generated skill by hand.
-Update the source guide and run `pnpm --filter succession-connect gen`.
+Maintained in `successionbio/succession-connect` (originally generated from `docs/surfaces/guides/roadmap.md`).
+Tool names checked against the live Succession ONE MCP catalog for v0.2.0.
 
 - Status: `live`
 - Category: `surface`
@@ -39,14 +39,19 @@ Primary MCP tools:
 
 1. On the first Succession interaction, call `ping` without context.
 2. If it returns `principal_type=workspace`, use Workspace-scoped tools
-   normally. Context is optional and cannot target another Workspace.
-3. If it returns `principal_type=agency`, use Agency-scoped tools without
-   context. Before client work, call `manage_managed_workspace` with
-   `action="resolve_workspace"`, then pass the exact returned `context`
-   object on every Workspace-scoped call, including `get_workspace_context`,
-   `list_skills`, and `run_skill`.
+   normally. `client_id` is optional and cannot target another Workspace.
+3. If it returns `principal_type=agency` (agency operators only), use
+   Agency-scoped tools without `client_id`. Before client work, call
+   `manage_managed_workspace` with `action="resolve_workspace"` and
+   `params.query` set to the client name or UUID, then pass the returned
+   `client_id` on every Workspace-scoped call, including
+   `get_workspace_context`, `list_skills`, and `run_skill`.
 4. Check `succession_context.workspace_name` in every result before relying
    on it. There is no persistent Workspace switch.
+5. Tools take `action`, `params`, optional `client_id`, and `confirm`.
+   Writes return a dry-run plan until they are called again with
+   `confirm=true` after the operator approves. Read-only `read_*` aliases
+   need no confirmation.
 
 
 
@@ -77,7 +82,8 @@ roadmap item.
   controls whether an item or comment is agency-internal or shared with the
   managed workspace.
 - `manage_roadmap` accepts an optional `managed_workspace_id` on every action.
-  Omit it to act on the caller's own workspace roadmap. An agency operator can
+  Omit it to act on the caller's own workspace roadmap (always omit it in a
+  customer Workspace; it is for agency operators only). An agency operator can
   pass a different workspace's id to review or act on a managed workspace's
   roadmap at `/agency/roadmap`; reads for another workspace fan out through a
   cross-workspace rollup, while writes are re-verified against the
